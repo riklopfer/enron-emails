@@ -19,7 +19,7 @@ def get_contents(mail_file: str) -> str:
         _skip_until_newline(ifp)
 
         for line in ifp:
-            if re.search(r'--Original Message--', line):
+            if re.search(r'--+ ?Original Message ?--+', line):
                 _skip_until_newline(ifp)
                 continue
 
@@ -55,7 +55,7 @@ def print_contents(maildir: str, boxes: Set[str], ofp):
 
 def main(args: argparse.Namespace):
     maildir = args.maildir
-    boxes = set(_.strip() for _ in args.boxes.split(','))
+    boxes = set(_.strip() for _ in args.boxes)
     out_file = args.out_file
     if out_file is None:
         out_file = f'{maildir}-clean.txt'
@@ -66,8 +66,8 @@ def main(args: argparse.Namespace):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--maildir', help="path to the top mail dir", default='maildir')
-    parser.add_argument('--boxes', help="target boxes", default='inbox')
+    parser.add_argument('--maildir', help="path to the top mail dir", required=True)
+    parser.add_argument('--box', help="target box", type=str, nargs='+', dest='boxes')
     parser.add_argument('--out-file', help="output file", default=None)
     args = parser.parse_args()
     sys.exit(main(args))

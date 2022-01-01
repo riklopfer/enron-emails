@@ -1,4 +1,2 @@
 .idea/
-maildir-clean.txt
-maildir/
-enron_mail_20150507.tar.gz
+data/
