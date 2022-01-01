@@ -1,12 +1,15 @@
 import argparse
 import glob
 import logging
+import os.path
 import sys
 
 from tokenizers import Tokenizer
 from tokenizers.models import BPE
 from tokenizers.pre_tokenizers import Whitespace, Digits, Sequence
 from tokenizers.trainers import BpeTrainer
+
+logger = logging.getLogger(os.path.basename(__file__))
 
 
 def main(args: argparse.Namespace):
@@ -23,6 +26,7 @@ def main(args: argparse.Namespace):
     tokenizer.train(files, trainer)
 
     tokenizer.save(out_path)
+    logger.info("Saved tokenizer to %s", out_path)
 
 
 if __name__ == '__main__':

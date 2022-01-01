@@ -26,3 +26,8 @@ Rust is required for HF tokenizers
 brew install rust
 ```
 
+Train tokenizer
+
+```shell
+python bin/train-tokenizer.py data/maildir-clean.txt
+```
