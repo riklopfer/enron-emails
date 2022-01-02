@@ -32,7 +32,7 @@ def main(args: argparse.Namespace):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('input_glob', help="glob for input files")
-    parser.add_argument('--out-path', help="write tokenizer to this file", default='tokenizer.json')
+    parser.add_argument('--out-path', '-o', help="write tokenizer to this file", default='tokenizer.json')
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO)
     sys.exit(main(args))
