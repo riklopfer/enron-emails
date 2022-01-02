@@ -29,6 +29,8 @@ Dump the "clean" text
 ```shell
 python bin/clean-dump.py --maildir data/maildir --box all_documents 
 
+python bin/clean-dump.py --maildir data/maildir --box inbox
+
 ```
 
 Train tokenizer
@@ -53,7 +55,7 @@ chmod +x bin/run_mlm.py
 ```shell
 bin/run_mlm.py --model_name_or_path=google/mobilebert-uncased \
 				--output_dir=model \
-				--train_file=data/maildir-clean.txt \
+				--train_file=data/maildir-inbox-clean.txt \
 				--max_seq_length=128 \
 				--learning_rate=5e-5 
 

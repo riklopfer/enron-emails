@@ -1,9 +1,14 @@
+#!/usr/bin/env python
+# coding=utf-8
 import argparse
 import glob
+import logging
 import os
 import re
 import sys
 from typing import Set
+
+logger = logging.getLogger(os.path.basename(__file__))
 
 
 def _skip_until_newline(fp):
@@ -33,6 +38,7 @@ def get_contents(mail_file: str) -> str:
 
 
 def print_contents(maildir: str, boxes: Set[str], ofp):
+    files_dumped = 0
     for person in os.listdir(maildir):
         person_dir = os.path.join(maildir, person)
 
@@ -49,8 +55,10 @@ def print_contents(maildir: str, boxes: Set[str], ofp):
                 try:
                     contents = get_contents(mail_file)
                     print(contents, file=ofp)
+                    files_dumped += 1
                 except UnicodeDecodeError:
                     pass
+    logger.info("%d files dumped", files_dumped)
 
 
 def main(args: argparse.Namespace):
@@ -58,10 +66,12 @@ def main(args: argparse.Namespace):
     boxes = set(_.strip() for _ in args.boxes)
     out_file = args.out_file
     if out_file is None:
-        out_file = f'{maildir}-clean.txt'
+        out_file = f'{maildir}-{"-".join(args.boxes)}-clean.txt'
 
     with open(out_file, 'w', encoding='utf8') as ofp:
         print_contents(maildir, boxes, ofp)
+
+    logger.info("Saved text to '%s'", out_file)
 
 
 if __name__ == '__main__':
@@ -70,4 +80,5 @@ if __name__ == '__main__':
     parser.add_argument('--box', help="target box", type=str, nargs='+', dest='boxes')
     parser.add_argument('--out-file', help="output file", default=None)
     args = parser.parse_args()
+    logging.basicConfig(level=logging.INFO)
     sys.exit(main(args))
