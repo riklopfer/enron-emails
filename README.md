@@ -50,4 +50,31 @@ curl -o bin/run_mlm.py https://raw.githubusercontent.com/huggingface/transformer
 chmod +x bin/run_mlm.py
 ```
 
+```shell
+bin/run_mlm.py --model_name_or_path=google/mobilebert-uncased \
+				--output_dir=model \
+				--train_file=data/maildir-clean.txt \
+				--max_seq_length=128 \
+				--learning_rate=5e-5 
+
+```
+
+Hey! It worked! But, it looks like it's goin gto take way too long to train. 
+
+```
+  267/62905 [..............................] - ETA: 16:40:51 - loss: 2.7156 
+```
+
+
+Installing Tensorflow
+=====================
+
+Instructions came from [here](https://developer.apple.com/metal/tensorflow-plugin/). Since I started from [here](https://github.com/riklopfer/DarwinZSH)-ish, I already had miniforge setup. 
+
+```shell
+conda install -c apple tensorflow-deps
+python -m pip install tensorflow-macos
+python -m pip install tensorflow-metal
+
+```
 
