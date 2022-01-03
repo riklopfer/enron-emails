@@ -34,16 +34,21 @@ class Generator(object):
         self.tokenizer = transformers.AutoTokenizer.from_pretrained(model)
         self.logger = logging.getLogger(self.__class__.__name__)
 
-    def _truncate_seed(self, seed_text: str, max_length: int) -> str:
-        tokens = self.tokenizer.tokenize(seed_text)
+    def _truncate_seed(self, seed_text: str, gen_max_length: int) -> str:
+        # half max length
+        seed_max_length = gen_max_length // 2
+        seed_min_length = gen_max_length // 10
 
-        # truncate to half max length
-        seed_max_length = max_length // 2
-        if len(tokens) > seed_max_length:
-            self.logger.warning("Truncating seed text:\n%s", seed_text)
-            return self.tokenizer.convert_tokens_to_string(tokens[:seed_max_length])
-        else:
+        tokens = self.tokenizer.tokenize(seed_text)
+        if len(tokens) < seed_min_length:
             return seed_text
+
+        # always truncate so that we can get something more interesting
+        truncated_length = min(seed_max_length, len(tokens) // 2)
+
+        seed_text = self.tokenizer.convert_tokens_to_string(tokens[:truncated_length])
+
+        return seed_text
 
     def _end_on_eos(self, text: str) -> str:
         # end on a sentence boundary? this assumes we have a
@@ -54,8 +59,9 @@ class Generator(object):
             return text
 
     def generate(self, seed_text: str, max_length: int) -> Tuple[str, str]:
+        self.logger.debug("Original seed: %s", seed_text)
+
         seed_text = self._truncate_seed(seed_text, max_length)
-        seed_text = self._end_on_eos(seed_text)
 
         t0 = time.time()
         result = self.generator(seed_text, max_length=max_length)
