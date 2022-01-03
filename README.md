@@ -162,3 +162,30 @@ family... yes!
 ```
 
 Well that was more fun than I expected! That's nice. 
+
+Generate Email
+==============
+
+Let's generate random emails seeded with an email sent from an enron user! I've done a bunch of clean up in the meantime, so that we can get a random email that _should be_ relatively clean. Now, we can try doing seeded generation... 
+
+```shell
+PYTHONPATH=$PWD python bin/gen-email.py --maildir data/maildir --box sent
+
+```
+
+It works! heheh. I had to do some truncation funny-business. Maybe I can find a fix later
+
+```
+....................
+seed_text: Judy,
+
+If you could reply to Melanie as follows:  Only deals NB0744.1 and ND6740.1 
+are Executed. Al...
+....................
+Judy,  If you could reply to Melanie as follows:  Only deals NB0744.1 and
+ND6740.1  are Executed. All of the other deals are waiting on Signed copy back
+from  Counterparty.  Deal NE1941.1 has not been approved by the Canada office to
+be  sent to the Counterparty as of yet.  Thanks, Joe  Joe A. Kincaid is a
+licensed trade mark attorney residing
+```
+
