@@ -1,9 +1,7 @@
 Mucking About with Enron Emails
 ===============================
 
-Got sick. Got a new M1 Macbook Air. Having fun waiting for the sickness to pass. 
-
-Started [here](https://www.cs.cmu.edu/~enron/)
+Got a refurbished M1 Macbook Air for myself for Christmas. Got sick. Having fun waiting for the sickness to pass. Started [here](https://www.cs.cmu.edu/~enron/) which I heard about in [this podcast](https://99percentinvisible.org/episode/youve-got-enron-mail/) some time ago.
 
 
 Set up
@@ -22,7 +20,7 @@ Rust is required for HF tokenizers
 brew install rust
 ```
 
-Install Tensorflow... Instructions came from [here](https://developer.apple.com/metal/tensorflow-plugin/). Since I started from [here](https://github.com/riklopfer/DarwinZSH)-ish, I already had miniforge setup. 
+Install Tensorflow... Instructions came from [here](https://developer.apple.com/metal/tensorflow-plugin/). Since I started from [here](https://github.com/riklopfer/DarwinZSH)-ish, I already had miniforge setup. I am using Tensorflow because M1 GPU acceleration is available. 
 
 ```shell
 # create & activate env
@@ -40,7 +38,6 @@ Install everything else
 ```shell
 pip install -r requirements.txt
 ```
-
 
 
 Train tokenizer
@@ -86,7 +83,7 @@ Hey! It worked! But, it looks like it's goin gto take way too long (6 hours per 
 
 Maybe we can reduce precision? Result is lol -- `loss: nan`. I imagine fp16 is just broken. 
 
-Okay. Let's just do something super small that will finish quickly. 
+Okay. Let's just do something super small that will finish quickly -- only the sent mail from this one lower-volume user `ring-a`
 
 ```shell
 python bin/clean-dump.py --maildir data/maildir --box sent --user ring-a
@@ -163,3 +160,5 @@ family... yes!
 ❯ grep family data/maildir/ring-a/sent/* | wc -l
        5
 ```
+
+Well that was more fun than I expected! That's nice. 
