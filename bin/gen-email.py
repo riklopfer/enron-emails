@@ -6,6 +6,7 @@ import os
 import random
 import sys
 import textwrap
+import time
 from typing import List, Tuple
 
 import transformers
@@ -31,13 +32,15 @@ class Generator(object):
     def __init__(self, model: str):
         self.generator = pipeline('text-generation', model=model)
         self.tokenizer = transformers.AutoTokenizer.from_pretrained(model)
+        self.logger = logging.getLogger(self.__class__.__name__)
 
     def _truncate_seed(self, seed_text: str, max_length: int) -> str:
         tokens = self.tokenizer.tokenize(seed_text)
+
         # truncate to half max length
         seed_max_length = max_length // 2
         if len(tokens) > seed_max_length:
-            logger.warning("Truncating seed text:\n%s", seed_text)
+            self.logger.warning("Truncating seed text:\n%s", seed_text)
             return self.tokenizer.convert_tokens_to_string(tokens[:seed_max_length])
         else:
             return seed_text
@@ -54,7 +57,9 @@ class Generator(object):
         seed_text = self._truncate_seed(seed_text, max_length)
         seed_text = self._end_on_eos(seed_text)
 
+        t0 = time.time()
         result = self.generator(seed_text, max_length=max_length)
+        self.logger.info("Finished generation in %.3f sec", time.time() - t0)
         generated = result.pop()['generated_text']
 
         generated = self._end_on_eos(generated)
@@ -91,4 +96,5 @@ if __name__ == '__main__':
 
     parser.add_argument('--model', help="model name or path", type=str, default='gpt2')
     parser.add_argument('--max_length', help="max generation length", type=int, default=200)
+    logging.basicConfig(level=logging.INFO)
     sys.exit(main(parser.parse_args()))
