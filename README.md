@@ -1,9 +1,13 @@
 Mucking About with Enron Emails
 ===============================
 
-Got sick. Got a new laptop. Having fun waiting for the sickness to pass. 
+Got sick. Got a new M1 Macbook Air. Having fun waiting for the sickness to pass. 
 
 Started [here](https://www.cs.cmu.edu/~enron/)
+
+
+Set up
+======
 
 Download the data (423M)
 
@@ -18,25 +22,39 @@ Rust is required for HF tokenizers
 brew install rust
 ```
 
-Install requirements
+Install Tensorflow... Instructions came from [here](https://developer.apple.com/metal/tensorflow-plugin/). Since I started from [here](https://github.com/riklopfer/DarwinZSH)-ish, I already had miniforge setup. 
+
+```shell
+# create & activate env
+conda create -n enron-emails python=3.9
+conda activate enron-emails
+# install stuff
+conda install -c apple tensorflow-deps
+python -m pip install tensorflow-macos
+python -m pip install tensorflow-metal
+
+```
+
+Install everything else
 
 ```shell
 pip install -r requirements.txt
 ```
 
-Dump the "clean" text
+
+
+Train tokenizer
+===============
+
+Dump some "clean" text
 
 ```shell
-python bin/clean-dump.py --maildir data/maildir --box all_documents 
-
-python bin/clean-dump.py --maildir data/maildir --box inbox
+python bin/clean-dump.py --maildir data/maildir --box sent 
 
 ```
 
-Train tokenizer
-
 ```shell
-python bin/train-tokenizer.py data/maildir-clean.txt -o data/tokenizer.json
+python bin/train-tokenizer.py data/maildir_sent.txt -o data/tokenizer.json
 ```
 
 Hmmm... Well that was fun. Let's poke around with a bit more later. 
@@ -55,28 +73,47 @@ chmod +x bin/run_mlm.py
 ```shell
 bin/run_mlm.py --model_name_or_path=google/mobilebert-uncased \
 				--output_dir=model \
-				--train_file=data/maildir-inbox-clean.txt \
+				--train_file=data/maildir_sent.txt \
 				--max_seq_length=128 \
+				--per_device_train_batch_size=32 \
+				--per_device_eval_batch_size=8 \
 				--learning_rate=5e-5 
 
 ```
 
-Hey! It worked! But, it looks like it's goin gto take way too long to train. 
+Hey! It worked! But, it looks like it's goin gto take way too long (6 hours per epoch) to train. 
 
-```
-  267/62905 [..............................] - ETA: 16:40:51 - loss: 2.7156 
-```
+Maybe we can reduce precision? Result is lol -- `loss: nan`. I imagine fp16 is just broken. 
 
-
-Installing Tensorflow
-=====================
-
-Instructions came from [here](https://developer.apple.com/metal/tensorflow-plugin/). Since I started from [here](https://github.com/riklopfer/DarwinZSH)-ish, I already had miniforge setup. 
+Okay. Let's just do something super small that will finish quickly. 
 
 ```shell
-conda install -c apple tensorflow-deps
-python -m pip install tensorflow-macos
-python -m pip install tensorflow-metal
+python bin/clean-dump.py --maildir data/maildir --box sent --user ring-a
+```
+
+```shell
+bin/run_mlm.py --model_name_or_path=google/mobilebert-uncased \
+				--output_dir=model \
+				--train_file=data/maildir_ring-a_sent.txt \
+				--max_seq_length=128 \
+				--per_device_train_batch_size=32 \
+				--per_device_eval_batch_size=8 \
+				--learning_rate=5e-5 
 
 ```
+
+
+Hooray! Success! 
+
+```
+  Final train loss: 1.818
+  Final train perplexity: 6.158
+  Final validation loss: 1.673
+  Final validation perplexity: 5.327
+Configuration saved in model/config.json
+Model weights saved in model/tf_model.h5
+```
+
+That was fun too. Can't do text generation... but we can do mask filling which is a little less entertaining. 
+
 

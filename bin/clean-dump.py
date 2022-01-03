@@ -1,12 +1,17 @@
 #!/usr/bin/env python
 # coding=utf-8
 import argparse
+import collections
 import glob
+import json
 import logging
 import os
 import re
 import sys
-from typing import Set
+import typing
+from typing import Set, Iterable
+
+import tqdm
 
 logger = logging.getLogger(os.path.basename(__file__))
 
@@ -37,39 +42,60 @@ def get_contents(mail_file: str) -> str:
     return content
 
 
-def print_contents(maildir: str, boxes: Set[str], ofp):
-    files_dumped = 0
-    for person in os.listdir(maildir):
-        person_dir = os.path.join(maildir, person)
+def find_files(maildir: str, boxes: Set[str], users: Set[str]) -> Iterable:
+    for user in os.listdir(maildir):
+        if users and user not in users:
+            continue
 
-        for box in os.listdir(person_dir):
-            if box not in boxes:
+        user_dir = os.path.join(maildir, user)
+
+        for box in os.listdir(user_dir):
+            if boxes and box not in boxes:
                 continue
-            box_dir = os.path.join(person_dir, box)
+            box_dir = os.path.join(user_dir, box)
 
             for mail_file in glob.glob(f'{box_dir}/**', recursive=True):
-                if not os.path.isfile(mail_file):
-                    continue
-                # print(mail_file)
+                if os.path.isfile(mail_file):
+                    yield mail_file
 
-                try:
-                    contents = get_contents(mail_file)
-                    print(contents, file=ofp)
-                    files_dumped += 1
-                except UnicodeDecodeError:
-                    pass
-    logger.info("%d files dumped", files_dumped)
+
+def print_contents(mail_files: Iterable[str], ofp: typing.TextIO):
+    mail_files = list(mail_files)
+
+    files_dumped = collections.Counter()
+    for mail_file in tqdm.tqdm(mail_files):
+        if not os.path.isfile(mail_file):
+            continue
+        try:
+            contents = get_contents(mail_file)
+            print(contents, file=ofp)
+            files_dumped[os.path.dirname(mail_file)] += 1
+        except UnicodeDecodeError:
+            pass
+
+    dump_info = collections.OrderedDict(sorted(files_dumped.items(), key=lambda _: _[1], reverse=True))
+    total_dumped = sum(dump_info.values())
+    logger.info("%d files dumped\n%s", total_dumped, json.dumps(dump_info, indent=2))
 
 
 def main(args: argparse.Namespace):
     maildir = args.maildir
-    boxes = set(_.strip() for _ in args.boxes)
+    boxes = set(args.boxes) if args.boxes else ()
+    users = set(args.users) if args.users else ()
     out_file = args.out_file
+
     if out_file is None:
-        out_file = f'{maildir}-{"-".join(args.boxes)}-clean.txt'
+        out_file = maildir
+        if users:
+            out_file += f'_{"+".join(users)}'
+        if boxes:
+            out_file += f'_{"+".join(boxes)}'
+        out_file += ".txt"
+
+    files = find_files(maildir, boxes, users)
 
     with open(out_file, 'w', encoding='utf8') as ofp:
-        print_contents(maildir, boxes, ofp)
+        print_contents(files, ofp)
 
     logger.info("Saved text to '%s'", out_file)
 
@@ -77,7 +103,8 @@ def main(args: argparse.Namespace):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--maildir', help="path to the top mail dir", required=True)
-    parser.add_argument('--box', help="target box", type=str, nargs='+', dest='boxes')
+    parser.add_argument('--box', help="target box", type=str, action='append', dest='boxes')
+    parser.add_argument('--user', help="target user", type=str, action='append', dest='users')
     parser.add_argument('--out-file', help="output file", default=None)
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO)
