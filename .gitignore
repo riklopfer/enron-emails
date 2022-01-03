@@ -1,4 +1,5 @@
 .idea/
 data/
-model/
+mlm_model/
+clm_model/
 *.pyc

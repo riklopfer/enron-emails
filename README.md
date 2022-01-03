@@ -69,7 +69,7 @@ chmod +x bin/run_mlm.py
 
 ```shell
 bin/run_mlm.py --model_name_or_path=google/mobilebert-uncased \
-				--output_dir=model \
+				--output_dir=mlm_model \
 				--train_file=data/maildir_sent.txt \
 				--num_train_epochs=3 \
 				--max_seq_length=128 \
@@ -91,7 +91,7 @@ PYTHONPATH=$PWD python bin/clean-dump.py --maildir data/maildir --box sent --use
 
 ```shell
 bin/run_mlm.py --model_name_or_path=google/mobilebert-uncased \
-				--output_dir=model \
+				--output_dir=mlm_model \
 				--train_file=data/maildir_ring-a_sent.txt \
 				--num_train_epochs=3 \
 				--max_seq_length=128 \
@@ -120,7 +120,7 @@ Mask Filling
 ============
 
 ```shell
-bin/fill-blanks.py --model=model/ "this is a _ of a _"
+bin/fill-blanks.py --model=mlm_model/ "this is a _ of a _"
 ```
 
 yay. success! 
@@ -217,3 +217,28 @@ love this book so much.
 
 
 So the next thing would be to try to make the generated text look more consistently like emails stuff instead of a weird story! Could try to update the weights of the model with continued training like we did with MLM... 
+
+
+CLM Training
+============
+
+Just like before... I'll grab the script and check it in. 
+
+```shell
+curl -o bin/run_clm.py https://raw.githubusercontent.com/huggingface/transformers/master/examples/tensorflow/language-modeling/run_clm.py && 
+chmod +x bin/run_clm.py
+```
+
+can we just re use the parameters from MLM??
+
+```shell
+bin/run_clm.py --model_name_or_path=gpt2 \
+				--output_dir=clm_model \
+				--train_file=data/maildir_sent.txt \
+				--num_train_epochs=3 \
+				--max_seq_length=128 \
+				--per_device_train_batch_size=32 \
+				--per_device_eval_batch_size=8 \
+				--learning_rate=5e-5 
+
+```
