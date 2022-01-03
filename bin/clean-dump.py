@@ -6,8 +6,7 @@ import json
 import logging
 import os
 import sys
-import typing
-from typing import Iterable
+from typing import TextIO, List
 
 import tqdm
 
@@ -16,9 +15,7 @@ from enron_emails import tools
 logger = logging.getLogger(os.path.basename(__file__))
 
 
-def print_contents(mail_files: Iterable[str], ofp: typing.TextIO):
-    mail_files = list(mail_files)
-
+def print_contents(mail_files: List[str], ofp: TextIO):
     files_dumped = collections.Counter()
     for mail_file in tqdm.tqdm(mail_files):
         if not os.path.isfile(mail_file):
@@ -41,7 +38,7 @@ def main(args: argparse.Namespace):
     users = set(args.users) if args.users else ()
     out_file = args.out_file
 
-    files = tools.find_files(maildir, boxes, users)
+    files = list(tools.find_files(maildir, boxes, users))
 
     if out_file is None:
         out_file = maildir

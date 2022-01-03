@@ -12,7 +12,7 @@ from enron_emails import tools
 logger = logging.getLogger(os.path.basename(__file__))
 
 
-def random_text(mail_files: List[str], seed=None):
+def random_text(mail_files: List[str], seed=None) -> str:
     rng = random.Random(seed)
     rng.shuffle(mail_files)
 
