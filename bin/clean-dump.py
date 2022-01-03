@@ -2,61 +2,18 @@
 # coding=utf-8
 import argparse
 import collections
-import glob
 import json
 import logging
 import os
-import re
 import sys
 import typing
-from typing import Set, Iterable
+from typing import Iterable
 
 import tqdm
 
+from enron_emails import tools
+
 logger = logging.getLogger(os.path.basename(__file__))
-
-
-def _skip_until_newline(fp):
-    for header_line in fp:
-        # print(header_line, end='')
-        if header_line == "\n":
-            break
-
-
-def get_contents(mail_file: str) -> str:
-    content = ''
-    with open(mail_file, 'r', encoding='utf8') as ifp:
-        _skip_until_newline(ifp)
-
-        for line in ifp:
-            if re.search(r'--+ ?Original Message ?--+', line):
-                _skip_until_newline(ifp)
-                continue
-
-            if line.startswith(">"):
-                continue
-
-            content += line
-            pass
-
-    return content
-
-
-def find_files(maildir: str, boxes: Set[str], users: Set[str]) -> Iterable:
-    for user in os.listdir(maildir):
-        if users and user not in users:
-            continue
-
-        user_dir = os.path.join(maildir, user)
-
-        for box in os.listdir(user_dir):
-            if boxes and box not in boxes:
-                continue
-            box_dir = os.path.join(user_dir, box)
-
-            for mail_file in glob.glob(f'{box_dir}/**', recursive=True):
-                if os.path.isfile(mail_file):
-                    yield mail_file
 
 
 def print_contents(mail_files: Iterable[str], ofp: typing.TextIO):
@@ -67,7 +24,7 @@ def print_contents(mail_files: Iterable[str], ofp: typing.TextIO):
         if not os.path.isfile(mail_file):
             continue
         try:
-            contents = get_contents(mail_file)
+            contents = tools.get_contents(mail_file)
             print(contents, file=ofp)
             files_dumped[os.path.dirname(mail_file)] += 1
         except UnicodeDecodeError:
@@ -84,6 +41,8 @@ def main(args: argparse.Namespace):
     users = set(args.users) if args.users else ()
     out_file = args.out_file
 
+    files = tools.find_files(maildir, boxes, users)
+
     if out_file is None:
         out_file = maildir
         if users:
@@ -91,8 +50,6 @@ def main(args: argparse.Namespace):
         if boxes:
             out_file += f'_{"+".join(boxes)}'
         out_file += ".txt"
-
-    files = find_files(maildir, boxes, users)
 
     with open(out_file, 'w', encoding='utf8') as ofp:
         print_contents(files, ofp)

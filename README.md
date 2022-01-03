@@ -46,7 +46,7 @@ Train tokenizer
 Dump some "clean" text
 
 ```shell
-python bin/clean-dump.py --maildir data/maildir --box sent 
+PYTHONPATH=$PWD python bin/clean-dump.py --maildir data/maildir --box sent 
 
 ```
 
@@ -86,7 +86,7 @@ Maybe we can reduce precision? Result is lol -- `loss: nan`. I imagine fp16 is j
 Okay. Let's just do something super small that will finish quickly -- only the sent mail from this one lower-volume user `ring-a`
 
 ```shell
-python bin/clean-dump.py --maildir data/maildir --box sent --user ring-a
+PYTHONPATH=$PWD python bin/clean-dump.py --maildir data/maildir --box sent --user ring-a
 ```
 
 ```shell
