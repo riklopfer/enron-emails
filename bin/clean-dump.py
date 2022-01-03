@@ -24,8 +24,8 @@ def print_contents(mail_files: Iterable[str], ofp: typing.TextIO):
         if not os.path.isfile(mail_file):
             continue
         try:
-            contents = tools.get_contents(mail_file)
-            print(contents, file=ofp)
+            thread = tools.get_thread(mail_file)
+            print("\n\n".join(thread), file=ofp)
             files_dumped[os.path.dirname(mail_file)] += 1
         except UnicodeDecodeError:
             pass

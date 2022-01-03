@@ -4,7 +4,6 @@ import argparse
 import logging
 import os
 import random
-import re
 import sys
 from typing import List
 
@@ -13,26 +12,14 @@ from enron_emails import tools
 logger = logging.getLogger(os.path.basename(__file__))
 
 
-def _is_good_segment(segment: str) -> bool:
-    if not segment:
-        return False
-
-    if re.search(r"^(:?To:|From:|cc:|Subject:).+@.+$", segment, flags=re.MULTILINE):
-        return False
-
-    return True
-
-
 def random_text(mail_files: List[str], seed=None):
     rng = random.Random(seed)
     rng.shuffle(mail_files)
 
     for file in mail_files:
-        contents = tools.get_contents(file)
-
-        segments = [_ for _ in contents.split("\n\n") if _is_good_segment(_)]
-        if segments:
-            return segments[0]
+        thread = tools.get_thread(file)
+        if thread:
+            return rng.sample(thread, k=1)[0]
 
 
 def main(args: argparse.Namespace):
