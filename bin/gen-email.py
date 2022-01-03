@@ -83,8 +83,7 @@ def main(args: argparse.Namespace):
 
     files = list(tools.find_files(maildir, boxes, users))
 
-    # keep going util killed
-    while True:
+    def print_generation():
         rand_text = random_text(files)
         seed_text, generated = generator.generate(rand_text, max_length)
 
@@ -92,6 +91,14 @@ def main(args: argparse.Namespace):
         print(textwrap.fill(f"seed_text: {seed_text}", width=80))
         print("." * 20)
         print(textwrap.fill(generated, width=80))
+        print()
+
+    # keep going util killed
+    while True:
+        try:
+            print_generation()
+        except KeyboardInterrupt:
+            break
 
 
 if __name__ == '__main__':

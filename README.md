@@ -189,4 +189,31 @@ It's like a big hole in your head.  And now, it's my turn.  And we shall start.
 I hope you've enjoyed!
 ```
 
+Let's try getting an email from `ring-a`...
+
+```shell
+PYTHONPATH=$PWD python bin/gen-email.py --maildir data/maildir --box sent --user ring-a
+```
+
+Ahhhhhh... classic `ring-a`
+
+```
+....................
+seed_text: How are you?  Hope everything is going well.  Not much going on here
+- I  think I'll go see the new movie with Richard Gere on Friday - wish you
+....................
+How are you?  Hope everything is going well.  Not much going on here - I  think
+I'll go see the new movie with Richard Gere on Friday - wish you the best of
+luck.. Well then, I have finally released my book of the month: The Best of
+Richard Gere and Robert Altman. I'm looking forward to watching it, thinking
+about my friends Richard and Robert and the others, and thinking about when I
+can finally give everything and go back and read it again. Reply Delete Great
+Book! The book will be just that awesome. It has a lot to offer. I love books so
+much! It also has the perfect balance of characters and plot. I'm glad I made
+the cover to use the original photos from David Cronenberg and Robert Altman on
+the cover. I think that the people who bought the book in the first place just
+love this book so much.
+```
+
+
 So the next thing would be to try to make the generated text look more consistently like emails stuff instead of a weird story! Could try to update the weights of the model with continued training like we did with MLM... 
