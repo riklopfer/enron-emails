@@ -177,15 +177,16 @@ It works! heheh. I had to do some truncation funny-business. Maybe I can find a 
 
 ```
 ....................
-seed_text: Judy,
-
-If you could reply to Melanie as follows:  Only deals NB0744.1 and ND6740.1 
-are Executed. Al...
+seed_text: Kim,  Thanks a lot. I appreciate your kind words.
 ....................
-Judy,  If you could reply to Melanie as follows:  Only deals NB0744.1 and
-ND6740.1  are Executed. All of the other deals are waiting on Signed copy back
-from  Counterparty.  Deal NE1941.1 has not been approved by the Canada office to
-be  sent to the Counterparty as of yet.  Thanks, Joe  Joe A. Kincaid is a
-licensed trade mark attorney residing
+Kim,  Thanks a lot. I appreciate your kind words.  Flaming the bottle, my cheeks
+were red…  When I saw you look so kind, I thought about something I've said
+before.  It's a pity that we'll end up living together after all.  Hence it's
+not only the same.  Even if we don't have a common goal, I think the time we
+have should be something that can live up to it.  Fluid is the most basic
+ingredient in life.  I don't think anyone could have achieved that after that.
+It's like a big hole in your head.  And now, it's my turn.  And we shall start.
+I hope you've enjoyed!
 ```
 
+So the next thing would be to try to make the generated text look more consistently like emails stuff instead of a weird story! Could try to update the weights of the model with continued training like we did with MLM... 

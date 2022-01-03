@@ -6,15 +6,14 @@ import os
 import random
 import sys
 import textwrap
-from typing import List
+from typing import List, Tuple
 
 import transformers
+from transformers.pipelines import pipeline
 
 from enron_emails import tools
 
 logger = logging.getLogger(os.path.basename(__file__))
-
-from transformers.pipelines import pipeline
 
 
 def random_text(mail_files: List[str], seed=None) -> str:
@@ -28,12 +27,38 @@ def random_text(mail_files: List[str], seed=None) -> str:
             # return rng.sample(thread, k=1)[0]
 
 
-def generate(model: str, seed_text: str, max_length: int) -> str:
-    generator = pipeline('text-generation', model=model)
+class Generator(object):
+    def __init__(self, model: str):
+        self.generator = pipeline('text-generation', model=model)
+        self.tokenizer = transformers.AutoTokenizer.from_pretrained(model)
 
-    result = generator(seed_text, max_length=max_length)
-    gen_text = result.pop()['generated_text']
-    return gen_text
+    def _truncate_seed(self, seed_text: str, max_length: int) -> str:
+        tokens = self.tokenizer.tokenize(seed_text)
+        # truncate to half max length
+        seed_max_length = max_length // 2
+        if len(tokens) > seed_max_length:
+            logger.warning("Truncating seed text:\n%s", seed_text)
+            return self.tokenizer.convert_tokens_to_string(tokens[:seed_max_length])
+        else:
+            return seed_text
+
+    def _end_on_eos(self, text: str) -> str:
+        # end on a sentence boundary? this assumes we have a
+        end_idx = max(text.rfind('.'), text.rfind('?'), text.rfind('!'))
+        if end_idx > -1:
+            return text[:end_idx + 1]
+        else:
+            return text
+
+    def generate(self, seed_text: str, max_length: int) -> Tuple[str, str]:
+        seed_text = self._truncate_seed(seed_text, max_length)
+        seed_text = self._end_on_eos(seed_text)
+
+        result = self.generator(seed_text, max_length=max_length)
+        generated = result.pop()['generated_text']
+
+        generated = self._end_on_eos(generated)
+        return seed_text, generated
 
 
 def main(args: argparse.Namespace):
@@ -41,23 +66,21 @@ def main(args: argparse.Namespace):
     boxes = set(args.boxes) if args.boxes else ()
     users = set(args.users) if args.users else ()
     max_length = args.max_length
+    model = args.model
+
+    generator = Generator(model)
 
     files = list(tools.find_files(maildir, boxes, users))
 
-    seed_text = random_text(files)
-    tokenizer = transformers.AutoTokenizer.from_pretrained(args.model)
-    tokens = tokenizer.tokenize(seed_text)
-    if len(tokens) > max_length:
-        # truncate to half max length
-        logger.warning("Truncating seed text:\n%s", seed_text)
-        seed_text = tokenizer.convert_tokens_to_string(tokens[:max_length // 2])
+    # keep going util killed
+    while True:
+        rand_text = random_text(files)
+        seed_text, generated = generator.generate(rand_text, max_length)
 
-    generated = generate(args.model, seed_text, max_length)
-
-    print("." * 20)
-    print(f"seed_text: {seed_text[:100]}{'...' if len(seed_text) > 100 else ''}")
-    print("." * 20)
-    print(textwrap.fill(generated, width=80))
+        print("." * 20)
+        print(textwrap.fill(f"seed_text: {seed_text}", width=80))
+        print("." * 20)
+        print(textwrap.fill(generated, width=80))
 
 
 if __name__ == '__main__':
@@ -67,5 +90,5 @@ if __name__ == '__main__':
     parser.add_argument('--user', help="target user", type=str, action='append', dest='users')
 
     parser.add_argument('--model', help="model name or path", type=str, default='gpt2')
-    parser.add_argument('--max_length', help="max generation length", type=int, default=100)
+    parser.add_argument('--max_length', help="max generation length", type=int, default=200)
     sys.exit(main(parser.parse_args()))
