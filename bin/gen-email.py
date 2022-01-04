@@ -107,7 +107,7 @@ if __name__ == '__main__':
     parser.add_argument('--box', help="target box", type=str, action='append', dest='boxes')
     parser.add_argument('--user', help="target user", type=str, action='append', dest='users')
 
-    parser.add_argument('--model', help="model name or path", type=str, default='gpt2')
+    parser.add_argument('--model', help="model name or path", type=str, default='distilgpt2')
     parser.add_argument('--max_length', help="max generation length", type=int, default=200)
     logging.basicConfig(level=logging.INFO)
     sys.exit(main(parser.parse_args()))
