@@ -229,18 +229,18 @@ curl -o bin/run_clm.py https://raw.githubusercontent.com/huggingface/transformer
 chmod +x bin/run_clm.py
 ```
 
-can we just re use the parameters from MLM?? 
+can we just re use the parameters from MLM?? not really... 
 
 * need to use `distilgpt2`
+* `block_size` instead of `max_seq_length` [PR](https://github.com/huggingface/transformers/pull/15036)
 
 ```shell
-		
 
 bin/run_clm.py --model_name_or_path=distilgpt2 \
 		--output_dir=clm_model \
 		--train_file=data/maildir_ring-a_sent.txt \
 		--num_train_epochs=3 \
-		--max_seq_length=128 \
+		--block_size=256 \
 		--per_device_train_batch_size=32 \
 		--per_device_eval_batch_size=8 \
 		--learning_rate=5e-5 
