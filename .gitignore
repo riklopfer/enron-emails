@@ -3,3 +3,4 @@ data/
 mlm_model/
 clm_model/
 *.pyc
+gpu_clm_model/

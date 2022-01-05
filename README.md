@@ -277,5 +277,65 @@ Model weights saved in clm_model/tf_model.h5
 
 Okay.. now it's hanging for some reason... 
 
+**GOING TO A CLOUD GPU**
+
+let's get more data... :P
+
+```shell
+PYTHONPATH=$PWD python bin/clean-dump.py --maildir data/maildir --box sent
+
+```
+
+```shell
+bin/run_clm.py --model_name_or_path=distilgpt2 \
+              --output_dir=gpu_clm_model \
+              --train_file=data/maildir_sent.txt \
+              --num_train_epochs=3 \
+              --block_size=256 \
+              --per_device_train_batch_size=64 \
+              --per_device_eval_batch_size=64 \
+              --learning_rate=5e-5 \
+              2>&1 | tee log
+
+```
+
+15 minutes later.... 
+
+```shell
+gcloud compute scp gpu-instance:~/enron-emails/gpu_clm_model.tar.gz .
+
+gcloud compute instances stop gpu-instance 
+```
+
+
+Now let's try generating again! :D
+
+```shell
+PYTHONPATH=$PWD python bin/gen-email.py --model gpu_clm_model/ --maildir data/maildir --box sent --user ring-a
+
+```
+
+```
+....................
+seed_text: A Preacher wanted to raise money for his church, and being told that
+there  was a fortune in Horse Racing, he decided to purchase a horse and enter
+him  in the race.  However, at the local auction the going price for horses was
+so steep that he ended up buying a Donkey instead.  He figured that since he
+had it, he might as well go ahead and enter it in the races, and to his
+surprise
+....................
+A Preacher wanted to raise money for his church, and being told that there  was
+a fortune in Horse Racing, he decided to purchase a horse and enter him  in the
+race.  However, at the local auction the going price for horses was   so steep
+that he ended up buying a Donkey instead.  He figured that since he   had it, he
+might as well go ahead and enter it in the races, and to his   surprise, he had
+to spend much of his time driving it around to get some of the  pets  to the
+finish line and that's ok.  How does  the new horses look?  They look so good.
+I guess they are more  beautiful than the old ones...this is a good horse.  I
+would like to have  them buy them.  I think there are many of those horses I've
+already  been thinking about.
+```
+
+Hahah. Oh man ring-a... never fail to disappoint. :)
 
 
