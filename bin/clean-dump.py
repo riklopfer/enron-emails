@@ -34,8 +34,8 @@ def print_contents(mail_files: List[str], ofp: TextIO):
 
 def main(args: argparse.Namespace):
     maildir = args.maildir
-    boxes = set(args.boxes) if args.boxes else ()
-    users = set(args.users) if args.users else ()
+    boxes = args.boxes if args.boxes else ()
+    users = args.users if args.users else ()
     out_file = args.out_file
 
     files = list(tools.find_files(maildir, boxes, users))

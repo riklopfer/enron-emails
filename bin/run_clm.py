@@ -546,6 +546,7 @@ def main():
 
         if training_args.output_dir is not None:
             model.save_pretrained(training_args.output_dir)
+            tokenizer.save_pretrained(training_args.output_dir)
 
     if training_args.push_to_hub:
         # You'll probably want to include some of your own metadata here!

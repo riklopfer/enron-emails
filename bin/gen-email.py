@@ -74,8 +74,8 @@ class Generator(object):
 
 def main(args: argparse.Namespace):
     maildir = args.maildir
-    boxes = set(args.boxes) if args.boxes else ()
-    users = set(args.users) if args.users else ()
+    boxes = args.boxes if args.boxes else ()
+    users = args.users if args.users else ()
     max_length = args.max_length
     model = args.model
 

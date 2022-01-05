@@ -69,13 +69,13 @@ chmod +x bin/run_mlm.py
 
 ```shell
 bin/run_mlm.py --model_name_or_path=google/mobilebert-uncased \
-				--output_dir=mlm_model \
-				--train_file=data/maildir_sent.txt \
-				--num_train_epochs=3 \
-				--max_seq_length=128 \
-				--per_device_train_batch_size=32 \
-				--per_device_eval_batch_size=8 \
-				--learning_rate=5e-5 
+                            --output_dir=mlm_model \
+                            --train_file=data/maildir_sent.txt \
+                            --num_train_epochs=3 \
+                            --max_seq_length=128 \
+                            --per_device_train_batch_size=32 \
+                            --per_device_eval_batch_size=8 \
+                            --learning_rate=5e-5 
 
 ```
 
@@ -91,13 +91,13 @@ PYTHONPATH=$PWD python bin/clean-dump.py --maildir data/maildir --box sent --use
 
 ```shell
 bin/run_mlm.py --model_name_or_path=google/mobilebert-uncased \
-				--output_dir=mlm_model \
-				--train_file=data/maildir_ring-a_sent.txt \
-				--num_train_epochs=3 \
-				--max_seq_length=128 \
-				--per_device_train_batch_size=32 \
-				--per_device_eval_batch_size=8 \
-				--learning_rate=5e-5 
+                            --output_dir=mlm_model \
+                            --train_file=data/maildir_ring-a_sent.txt \
+                            --num_train_epochs=3 \
+                            --max_seq_length=128 \
+                            --per_device_train_batch_size=32 \
+                            --per_device_eval_batch_size=8 \
+                            --learning_rate=5e-5 
 
 ```
 
@@ -237,12 +237,45 @@ can we just re use the parameters from MLM?? not really...
 ```shell
 
 bin/run_clm.py --model_name_or_path=distilgpt2 \
-		--output_dir=clm_model \
-		--train_file=data/maildir_ring-a_sent.txt \
-		--num_train_epochs=3 \
-		--block_size=256 \
-		--per_device_train_batch_size=32 \
-		--per_device_eval_batch_size=8 \
-		--learning_rate=5e-5 
+              --output_dir=clm_model \
+              --train_file=data/maildir_ring-a_sent.txt \
+              --num_train_epochs=3 \
+              --block_size=256 \
+              --per_device_train_batch_size=32 \
+              --per_device_eval_batch_size=8 \
+              --learning_rate=5e-5 
 
 ```
+
+Almost working. Just need a little more data. let's add `pereira-s` who has similar volume to ring-a
+
+```shell
+PYTHONPATH=$PWD python bin/clean-dump.py --maildir data/maildir --box sent --user ring-a --user pereira-s
+
+```
+
+```shell
+bin/run_clm.py --model_name_or_path=distilgpt2 \
+              --output_dir=clm_model \
+              --train_file=data/maildir_ring-a+pereira-s_sent.txt \
+              --num_train_epochs=3 \
+              --block_size=256 \
+              --per_device_train_batch_size=32 \
+              --per_device_eval_batch_size=8 \
+              --learning_rate=5e-5 
+
+```
+
+
+Nice! But we forgot to save the tokenizer... so one more time. 
+
+```
+5/5 [==============================] - 221s 51s/step - loss: 3.4780 - val_loss: 3.5771
+Configuration saved in clm_model/config.json
+Model weights saved in clm_model/tf_model.h5
+```
+
+Okay.. now it's hanging for some reason... 
+
+
+
